@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le tournoi des prouveurs</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0d1020;color:#f5f7ff;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:28px 18px 50px}.hero{text-align:center;margin-bottom:25px}
+h1{font-size:clamp(2rem,7vw,4rem);margin:8px 0;background:linear-gradient(90deg,#8b5cf6,#22d3ee);-webkit-background-clip:text;color:transparent}
+.sub{color:#aeb5cc}.card{background:#171b30;border:1px solid #2b3150;border-radius:20px;padding:22px;margin:16px 0;box-shadow:0 10px 30px #0003}
+h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+label{display:block;font-weight:700;margin-bottom:6px}.player{border:1px solid #303653;border-radius:15px;padding:14px;background:#12162a}
+input{width:100%;background:#0c1020;border:1px solid #3b4262;color:white;padding:12px;border-radius:10px;margin-bottom:8px;font-size:15px}
+button{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:15px}
+.primary{background:linear-gradient(90deg,#7c3aed,#06b6d4);color:white}.secondary{background:#292f49;color:white}.danger{background:#4a1f2a;color:#ffb4c2}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.hidden{display:none}.result{font-size:clamp(1.1rem,3vw,1.5rem);line-height:1.55}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#252b48;color:#cdd5f7;font-size:12px;margin:2px}.draw{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.winner{border:1px solid #3c8d86;background:#102a2b}.muted{color:#929ab5}.small{font-size:13px}.copy{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero"><div class="small">🎮 6 joueurs · 3 choix chacun</div><h1>Le tournoi des prouveurs</h1><div class="sub">Chacun propose 3 jeux, puis le site tire 1 jeu au hasard pour chaque joueur.</div></div>
+<section class="card"><h2>1. Les joueurs</h2><div id="players" class="grid"></div><div class="actions"><button class="primary" onclick="draw()">🎲 Tirer les jeux</button><button class="secondary" onclick="fillDemo()">Exemple</button><button class="danger" onclick="resetAll()">Réinitialiser</button></div></section>
+<section id="results" class="card hidden"><h2>2. Tirage</h2><p class="muted">Un seul des 3 jeux de chaque joueur a été sélectionné.</p><div id="draw" class="draw"></div><div class="actions"><button class="primary" onclick="draw()">🎲 Refaire le tirage</button><button class="secondary copy" onclick="copyResults()">📋 Copier les résultats</button></div><p id="copied" class="small muted"></p></section>
+</div>
+<script>
+const N=6,players=document.getElementById('players');
+for(let i=0;i<N;i++)players.innerHTML+=`<div class="player"><label>Joueur ${i+1}</label><input id="p${i}name" placeholder="Prénom"><input id="p${i}g0" placeholder="Jeu 1"><input id="p${i}g1" placeholder="Jeu 2"><input id="p${i}g2" placeholder="Jeu 3"></div>`;
+function val(id){return document.getElementById(id).value.trim()}
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function draw(){const data=[];for(let i=0;i<N;i++){const name=val(`p${i}name`)||`Joueur ${i+1}`,games=[val(`p${i}g0`),val(`p${i}g1`),val(`p${i}g2`)].filter(Boolean);if(games.length<3){alert(`Il manque des jeux pour ${name}. Chaque joueur doit proposer 3 jeux.`);return}data.push({name,game:games[Math.floor(Math.random()*games.length)]})}document.getElementById('draw').innerHTML=data.map(x=>`<div class="player winner"><strong>${esc(x.name)}</strong><br><span class="pill">🎲 ${esc(x.game)}</span></div>`).join('');document.getElementById('results').classList.remove('hidden');window.last=data;document.getElementById('results').scrollIntoView({behavior:'smooth'})}
+function fillDemo(){const n=['Joueur 1','Joueur 2','Joueur 3','Joueur 4','Joueur 5','Joueur 6'],g=[['Mario Kart','FC 26','Smash Bros'],['Rocket League','Minecraft','Overcooked'],['FIFA','Tekken 8','Fortnite'],['Mario Party','Call of Duty','Fall Guys'],['GTA V','Trackmania','Gang Beasts'],['Pummel Party','Worms','Brawlhalla']];for(let i=0;i<N;i++){document.getElementById(`p${i}name`).value=n[i];for(let j=0;j<3;j++)document.getElementById(`p${i}g${j}`).value=g[i][j]}}
+function resetAll(){document.querySelectorAll('input').forEach(x=>x.value='');document.getElementById('results').classList.add('hidden');document.getElementById('draw').innerHTML=''}
+async function copyResults(){const t=window.last.map(x=>`${x.name} : ${x.game}`).join('\n');try{await navigator.clipboard.writeText(t);document.getElementById('copied').textContent='Résultats copiés !'}catch(e){document.getElementById('copied').textContent=t}}
+</script>
+</body></html>
